@@ -21,18 +21,30 @@ Every project goes through this process. A todo list, a single-function utility,
 
 ## Checklist
 
-You MUST create a task for each of these items and complete them in order:
+Complete these steps in order. Create a task for each step **as you begin it** (not all at once). Use the exact subjects below:
 
 1. **Explore project context** - check files, docs, recent commits
+   - TaskCreate subject: `"Explore project context"`
 2. **Offer visual companion** (if topic will involve visual questions) - this is its own message, not combined with a clarifying question. See the Visual Companion section below.
+   - TaskCreate subject: `"Offer visual companion"`
 3. **Ask clarifying questions** - one at a time, understand purpose/constraints/success criteria
+   - TaskCreate subject: `"Ask clarifying questions"`
 4. **Propose 2-3 approaches** - with trade-offs and your recommendation
+   - TaskCreate subject: `"Propose approaches"`
 5. **Present design** - in sections scaled to their complexity, get user approval after each section
+   - TaskCreate subject: `"Present design"`
 6. **Write design doc** - save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit
+   - TaskCreate subject: `"Write design doc"`
 7. **Spec self-review** - quick inline check for placeholders, contradictions, ambiguity, scope (see below)
+   - TaskCreate subject: `"Spec self-review"`
 8. **Adversarial spec review** - dispatch two opus subagents (advocate + challenger), reconcile findings, fix spec (see below)
+   - TaskCreate subject: `"Adversarial spec review"`
 9. **User reviews written spec** - ask user to review the spec file before proceeding
+   - TaskCreate subject: `"User reviews spec"`
 10. **Transition to implementation** - invoke writing-plans skill to create implementation plan
+    - TaskCreate subject: `"Transition to implementation"`
+
+**Do NOT create all 10 tasks at once.** Create each task individually when you start that step, with the subject above and a one-line description of what you're doing. Mark it in_progress immediately, then completed when done.
 
 ## Process Flow
 
