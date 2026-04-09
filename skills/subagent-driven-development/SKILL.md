@@ -93,13 +93,14 @@ When dispatching an implementer subagent:
 
 ## Model Policy
 
-All subagents use opus. No exceptions. This applies to:
-- Implementation subagents
-- Spec compliance reviewer subagents
-- Code quality reviewer subagents
-- Final code reviewer subagent
+Implementation subagents use sonnet. Review and orchestration use opus. The orchestrator (you) stays on opus to catch what sonnet misses.
 
-When dispatching any subagent via the Agent tool, always pass `model: "opus"`.
+| Role | Model | Rationale |
+|------|-------|-----------|
+| Implementation subagents | `model: "sonnet"` | Mechanical work from well-specified plans |
+| Spec compliance reviewer subagents | `model: "opus"` | Judgment-heavy, catches spec drift |
+| Code quality reviewer subagents | `model: "opus"` | Judgment-heavy, catches quality issues |
+| Final code reviewer subagent | `model: "opus"` | Holistic review across all tasks |
 
 ## Handling Implementer Status
 
