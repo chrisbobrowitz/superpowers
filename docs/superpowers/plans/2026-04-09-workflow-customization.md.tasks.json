@@ -1,0 +1,37 @@
+{
+  "planPath": "docs/superpowers/plans/2026-04-09-workflow-customization.md",
+  "tasks": [
+    {
+      "id": 8,
+      "subject": "Task 1: Delete CI/deployment artifacts",
+      "status": "pending"
+    },
+    {
+      "id": 11,
+      "subject": "Task 2: Add brainstorming re-trigger to using-superpowers",
+      "status": "pending"
+    },
+    {
+      "id": 9,
+      "subject": "Task 3: Add adversarial spec review gate to brainstorming",
+      "status": "pending"
+    },
+    {
+      "id": 6,
+      "subject": "Task 4: Modify writing-plans for adversarial review, TDD, auto-select",
+      "status": "pending"
+    },
+    {
+      "id": 10,
+      "subject": "Task 5: Reinforce code review, finishing branch, opus-only",
+      "status": "pending"
+    },
+    {
+      "id": 7,
+      "subject": "Task 6: Plugin swap",
+      "status": "pending",
+      "blockedBy": [8, 11, 9, 6, 10]
+    }
+  ],
+  "lastUpdated": "2026-04-09T00:00:00Z"
+}
