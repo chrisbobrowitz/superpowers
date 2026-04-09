@@ -46,6 +46,20 @@ Complete these steps in order. Create a task for each step **as you begin it** (
 
 **Do NOT create all 10 tasks at once.** Create each task individually when you start that step, with the subject above and a one-line description of what you're doing. Mark it in_progress immediately, then completed when done.
 
+### Checkpoint Triggers
+
+After completing each checklist step (marking the task as completed), write a checkpoint to `.claude-workflow-state.json`:
+
+- Set `activeSkill` to `"brainstorming"`
+- Set `phase` to the current phase name (see workflow-checkpoint skill for phase names)
+- Append the phase to `completedPhases`
+- After clarifying questions: append each Q&A pair to `decisions` array
+- After approach selection: append the chosen approach to `decisions`
+- After each design section approval: append the section name and approval to `decisions`
+- After writing spec: set `artifacts.specPath` to the spec file path
+
+This enables cross-session resume. If the session crashes, a new session can skip completed phases and avoid re-asking questions the user already answered.
+
 ## Process Flow
 
 ```dot

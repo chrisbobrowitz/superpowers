@@ -1,0 +1,15 @@
+{
+  "planPath": "docs/superpowers/plans/2026-04-09-workflow-improvements.md",
+  "tasks": [
+    {"id": 13, "subject": "Task 1: Add .gitignore entries", "status": "pending"},
+    {"id": 20, "subject": "Task 2: Add multi-instance isolation to using-git-worktrees", "status": "pending"},
+    {"id": 16, "subject": "Task 3: Add rebase-before-finish gate", "status": "pending"},
+    {"id": 18, "subject": "Task 4: Add drift detection to subagent-driven-development", "status": "pending"},
+    {"id": 21, "subject": "Task 5: Create workflow-checkpoint skill", "status": "pending"},
+    {"id": 14, "subject": "Task 6: Add resume detection to using-superpowers", "status": "pending", "blockedBy": [21]},
+    {"id": 17, "subject": "Task 7: Add checkpoint triggers to brainstorming", "status": "pending", "blockedBy": [21]},
+    {"id": 19, "subject": "Task 8: Add checkpoint triggers to writing-plans", "status": "pending", "blockedBy": [21]},
+    {"id": 15, "subject": "Task 9: Add checkpoint triggers to subagent-driven-development", "status": "pending", "blockedBy": [21]}
+  ],
+  "lastUpdated": "2026-04-09T00:00:00Z"
+}

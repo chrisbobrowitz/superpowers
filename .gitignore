@@ -5,3 +5,5 @@
 node_modules/
 inspo
 triage/
+.claude-instance-lock
+.claude-workflow-state.json

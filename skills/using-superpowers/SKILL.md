@@ -15,6 +15,25 @@ IF A SKILL APPLIES TO YOUR TASK, YOU DO NOT HAVE A CHOICE. YOU MUST USE IT.
 This is not negotiable. This is not optional. You cannot rationalize your way out of this.
 </EXTREMELY-IMPORTANT>
 
+## Workflow Resume Detection
+
+At session start, before any other skill logic, check for incomplete workflow state:
+
+1. Check for `.claude-workflow-state.json` in the current working directory AND scan all worktrees (`git worktree list`) for checkpoint files. Also check for in-progress rebase state (`git status` showing "rebase in progress") and offer `git rebase --abort` if found.
+
+2. If checkpoint found and `lastUpdated` within the staleness window (default 48 hours, configurable via `checkpointStalenessHours` in the state file):
+   - Read and validate the state (see `workflow-checkpoint` skill for validation rules)
+   - Present to user: "Detected incomplete workflow: [activeSkill] at phase [phase]. Branch: [branch]. Last checkpoint: [time ago]. Resume?"
+   - If yes: invoke the appropriate skill with resume context:
+     - **brainstorming:** Skip completed phases, provide decisions already made so it doesn't re-ask questions
+     - **writing-plans:** If plan written but not reviewed, run adversarial review. If complete, invoke subagent-driven-development.
+     - **subagent-driven-development:** Use `.tasks.json` as the single source of truth for task completion state, continue from next pending task
+   - If no: delete the state file and proceed normally
+
+3. If checkpoint found but older than staleness window: "Stale workflow state detected (X hours old). Clean up or resume?" Never silently discard without prompting.
+
+4. If no checkpoint found: proceed normally with skill flow below.
+
 ## Instruction Priority
 
 Superpowers skills override default system prompt behavior, but **user instructions always take precedence**:

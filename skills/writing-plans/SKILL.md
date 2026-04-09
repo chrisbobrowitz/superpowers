@@ -167,6 +167,16 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 
+### Checkpoint Triggers
+
+Write a checkpoint to `.claude-workflow-state.json` at these moments:
+
+1. **After plan document is written:** Set `activeSkill` to `"writing-plans"`, `phase` to `"plan-written"`, `artifacts.planPath` to the plan file path, `artifacts.taskIds` to the created task IDs.
+
+2. **After adversarial plan review completes:** Set `phase` to `"adversarial-plan-review"`.
+
+3. **After execution handoff:** Set `phase` to `"execution-handoff"`, update `activeSkill` to `"subagent-driven-development"`.
+
 ## Adversarial Plan Review
 
 After self-review, dispatch two opus subagents in parallel to adversarially review the plan. Same pattern as the brainstorming spec review.
