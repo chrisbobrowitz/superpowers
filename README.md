@@ -1,108 +1,62 @@
-# Superpowers Extended for Claude Code
+# Superpowers Extended CC (Personal Fork)
 
-A community-maintained fork of [obra/superpowers](https://github.com/obra/superpowers) specifically for Claude Code users.
+Personal fork of [pcvelz/superpowers](https://github.com/pcvelz/superpowers) (itself a fork of [obra/superpowers](https://github.com/obra/superpowers)) with opinionated workflow customizations.
 
-## Why This Fork Exists
+## What This Fork Changes
 
-The original Superpowers is designed as a cross-platform toolkit that works across multiple AI CLI tools (Claude Code, Codex, OpenCode, Gemini CLI). Features unique to Claude Code fall outside the scope of the upstream project due to its [cross-platform nature](https://github.com/obra/superpowers/pull/344#issuecomment-3795515617).
+This fork enforces a specific development workflow on top of the upstream superpowers-extended-cc plugin. All changes are in-place modifications to existing skill files.
 
-This fork integrates Claude Code-native features into the Superpowers workflow.
+### Workflow Customizations
 
-### What We Do Differently
+| Customization | Skill Modified | What It Does |
+|---------------|----------------|--------------|
+| Brainstorming re-trigger | `using-superpowers` | Re-invokes brainstorming mid-conversation for any new non-trivial ask, with bias toward triggering |
+| Adversarial spec review | `brainstorming` | After spec self-review, dispatches two opus subagents (advocate + challenger) to adversarially review the spec |
+| Adversarial plan review | `writing-plans` | Same advocate/challenger pattern applied to implementation plans |
+| Mandatory TDD | `writing-plans` | All code-producing tasks must specify tests-first ordering. No exceptions for code. Skill edits, config, and docs are excluded. |
+| Auto-select subagent-driven | `writing-plans` | Removes the user choice between subagent-driven and parallel session. Always uses subagent-driven development. |
+| Opus-only subagents | `subagent-driven-development` | All subagents use opus. Replaces the tiered cheap/standard/capable model selection. |
+| Mandatory code review | `subagent-driven-development` | Final code review is mandatory with a HARD-GATE. All findings must be addressed before proceeding. |
+| Mandatory finishing branch | `subagent-driven-development` | Must invoke finishing-a-development-branch before any push or PR. WIP pushes allowed when explicitly requested. |
 
-- Leverage Claude Code-native features as they're released
-- Community-driven - contributions welcome for any CC-specific enhancement
-- Track upstream - stay compatible with obra/superpowers core workflow
+### Removed from Upstream
 
-### Current Enhancements
-
-| Feature | Claude Code Version | Description |
-|---------|---------------------|-------------|
-| Native Task Management | v2.1.16+ | Dependency tracking, real-time progress visibility |
-| Structured Task Metadata | v2.1.16+ | Goal/Files/AC/Verify structure with embedded `json:metadata` |
-| Pre-commit Task Gate | v2.1.16+ | Plugin hook blocks `git commit` when tasks are incomplete |
-
-## Visual Comparison
-
-<table>
-<tr>
-<th>Superpowers (Vanilla)</th>
-<th>Superpowers Extended CC</th>
-</tr>
-<tr>
-<td valign="top">
-
-![Vanilla](docs/screenshots/vanilla-session.png)
-
-- Tasks exist only in markdown plan
-- No runtime task visibility
-- Agent may jump ahead or skip tasks
-- Progress tracked manually by reading output
-
-</td>
-<td valign="top">
-
-![Extended CC](docs/screenshots/extended-cc-session.png)
-
-- **Dependency enforcement** - Task 2 blocked until Task 1 completes (no front-running)
-- **Execution on rails** - Native task manager keeps agent following the plan
-- **Real-time visibility** - User sees actual progress with pending/in_progress/completed states
-- **Session-aware** - TaskList shows what's done, what's blocked, what's next
-
-</td>
-</tr>
-</table>
+- `.github/` directory (issue templates, PR template, funding config)
+- `scripts/bump-version.sh`
 
 ## Installation
 
-### Option 1: Via Marketplace (recommended)
-
 ```bash
 # Register marketplace
-/plugin marketplace add pcvelz/superpowers
+claude plugin marketplace add chrisbobrowitz/superpowers
 
 # Install plugin
-/plugin install superpowers-extended-cc@superpowers-extended-cc-marketplace
-```
-
-### Option 2: Direct URL
-
-```bash
-/plugin install --source url https://github.com/pcvelz/superpowers.git
+claude plugin install superpowers-extended-cc@superpowers-extended-cc-marketplace
 ```
 
 ### Verify Installation
 
-Check that commands appear:
-
 ```bash
-/help
+claude plugin list
 ```
 
-```
-# Should see:
-# /superpowers-extended-cc:brainstorming - Interactive design refinement
-# /superpowers-extended-cc:writing-plans - Create implementation plan
-# /superpowers-extended-cc:executing-plans - Execute plan in batches
-```
+You should see `superpowers-extended-cc@superpowers-extended-cc-marketplace` listed and enabled.
 
-## The Basic Workflow
+## The Workflow
 
-1. **brainstorming** - Activates before writing code. Refines rough ideas through questions, explores alternatives, presents design in sections for validation. Saves design document.
+1. **brainstorming** - Activates before writing code. Refines ideas through questions, explores alternatives, validates design in sections. Runs adversarial spec review (advocate + challenger) before user review. Saves design document.
 
 2. **using-git-worktrees** - Activates after design approval. Creates isolated workspace on new branch, runs project setup, verifies clean test baseline.
 
-3. **writing-plans** - Activates with approved design. Breaks work into bite-sized tasks (2-5 minutes each). Every task has exact file paths, complete code, verification steps. *Creates native tasks with dependencies.*
+3. **writing-plans** - Activates with approved design. Breaks work into TDD-structured tasks. Runs adversarial plan review. Auto-invokes subagent-driven development.
 
-4. **subagent-driven-development** or **executing-plans** - Activates with plan. Dispatches fresh subagent per task with two-stage review (spec compliance, then code quality), or executes in batches with human checkpoints.
+4. **subagent-driven-development** - Dispatches fresh opus subagent per task with two-stage review (spec compliance, then code quality). Mandatory final code review before finishing.
 
-5. **test-driven-development** - Activates during implementation. Enforces RED-GREEN-REFACTOR: write failing test, watch it fail, write minimal code, watch it pass, commit. Deletes code written before tests.
+5. **test-driven-development** - Enforces RED-GREEN-REFACTOR within every code-producing task. Tests written and verified failing before any implementation.
 
-6. **requesting-code-review** - Activates between tasks. Reviews against plan, reports issues by severity. Critical issues block progress.
+6. **finishing-a-development-branch** - Mandatory before any push or PR. Verifies tests, presents options (merge/PR/keep/discard), cleans up worktree.
 
-7. **finishing-a-development-branch** - Activates when tasks complete. Verifies tests, presents options (merge/PR/keep/discard), cleans up worktree.
-
-**The agent checks for relevant skills before any task.** Mandatory workflows, not suggestions.
+**The agent checks for relevant skills before any task.** Non-trivial mid-conversation asks re-trigger brainstorming.
 
 ## How Native Tasks Work
 
@@ -171,17 +125,6 @@ The `json:metadata` block is embedded in the description because `TaskGet` retur
 
 Read more: [Superpowers for Claude Code](https://blog.fsck.com/2025/10/09/superpowers/)
 
-## Contributing
-
-Contributions for Claude Code-specific enhancements are welcome!
-
-1. Fork this repository
-2. Create a branch for your enhancement
-3. Follow the `writing-skills` skill for creating and testing new skills
-4. Submit a PR
-
-See `skills/writing-skills/SKILL.md` for the complete guide.
-
 ## Recommended Configuration
 
 ### Disable Auto Plan Mode
@@ -228,21 +171,14 @@ The hook ships with the plugin at `hooks/examples/pre-commit-check-tasks.sh`. Th
 
 ## Updating
 
-Skills update automatically when you update the plugin:
-
 ```bash
-/plugin update superpowers-extended-cc@superpowers-extended-cc-marketplace
+claude plugin update superpowers-extended-cc@superpowers-extended-cc-marketplace
 ```
 
-## Upstream Compatibility
+## Upstream
 
-This fork tracks `obra/superpowers` main branch. Changes specific to Claude Code are additive - the core workflow remains compatible.
+This fork tracks [pcvelz/superpowers](https://github.com/pcvelz/superpowers) which tracks [obra/superpowers](https://github.com/obra/superpowers). Workflow customizations are additive modifications to existing skill files. Upstream merges will have predictable conflicts in the modified skills.
 
 ## License
 
 MIT License - see LICENSE file for details
-
-## Support
-
-- **Issues**: https://github.com/pcvelz/superpowers/issues
-- **Upstream**: https://github.com/obra/superpowers
