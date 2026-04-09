@@ -7,7 +7,7 @@ description: Use when you have a spec or requirements for a multi-step task, bef
 
 ## CRITICAL CONSTRAINTS — Read Before Anything Else
 
-**You MUST NOT call `EnterPlanMode` or `ExitPlanMode` at any point during this skill.** This skill operates in normal mode and manages its own completion flow via `AskUserQuestion`. Calling `EnterPlanMode` traps the session in plan mode where Write/Edit are restricted. Calling `ExitPlanMode` breaks the workflow and skips the user's execution choice. If you feel the urge to call either, STOP — follow this skill's instructions instead.
+**You MUST NOT call `EnterPlanMode` or `ExitPlanMode` at any point during this skill.** This skill operates in normal mode and hands off to subagent-driven-development at the end. Calling `EnterPlanMode` traps the session in plan mode where Write/Edit are restricted. Calling `ExitPlanMode` breaks the workflow and skips execution. If you feel the urge to call either, STOP — follow this skill's instructions instead.
 
 ## Overview
 
@@ -59,6 +59,8 @@ See `skills/shared/task-format-reference.md` for the full granularity guide.
 
 Key principle: TDD cycles happen WITHIN tasks, not as separate tasks. A task is "Implement X with tests" — the red-green-refactor steps are execution detail inside the task, not task boundaries.
 
+**TDD mandate:** All tasks that produce application or production code MUST specify tests-first ordering. The "Steps" section of every code-producing task begins with "Write the failing test" before any implementation. Skill file edits, configuration changes, and documentation are excluded from this requirement.
+
 **Scope test:**
 1. Can it be verified independently? (if no → too small)
 2. Does it touch more than one concern? (if yes → too big)
@@ -71,7 +73,7 @@ Key principle: TDD cycles happen WITHIN tasks, not as separate tasks. A task is 
 ```markdown
 # [Feature Name] Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers-extended-cc:subagent-driven-development (recommended) or superpowers-extended-cc:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers-extended-cc:subagent-driven-development to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** [One sentence describing what this builds]
 
@@ -161,41 +163,55 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 
 **3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
 
+**4. TDD ordering:** Does every task that produces code have tests written before implementation in its Steps section? If any task has implementation before tests, reorder the steps.
+
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
+
+## Adversarial Plan Review
+
+After self-review, dispatch two opus subagents in parallel to adversarially review the plan. Same pattern as the brainstorming spec review.
+
+**Dispatch two opus subagents in parallel:**
+
+1. **Advocate subagent:** Argues the plan is ready to execute. Validates task ordering, granularity, completeness against the spec, TDD structure, and that each task is independently verifiable. Prompt must include:
+   - The full plan document content
+   - The spec document path (so advocate can reference it)
+   - "You are the ADVOCATE. A CHALLENGER is reviewing this same plan."
+   - "Keep under 500 words."
+
+2. **Challenger subagent:** Argues the plan has problems. Looks for missing steps, incorrect ordering, tasks too large or too small, implicit dependencies not captured, gaps in test coverage strategy, assumptions about the codebase that haven't been verified. Prompt must include:
+   - The full plan document content
+   - The spec document path
+   - "You are the CHALLENGER. An ADVOCATE is reviewing this same plan."
+   - "Keep under 500 words. Focus on top 5-7 most impactful issues."
+
+**Both subagents MUST use model: opus.**
+
+**Reconciliation:** Same rules as the brainstorming adversarial spec review:
+
+| Situation | Action |
+|-----------|--------|
+| Challenger raises point advocate also flagged as risk | High-confidence issue. Fix it. |
+| Challenger raises point advocate explicitly defended | Evaluate both arguments. Pick the stronger one. |
+| Both agree on a point | No action needed. |
+| Neither can resolve, depends on user intent/domain knowledge | Surface to user. |
+
+After reconciliation, update the plan document in-place with fixes. Then proceed to execution.
 
 ## Execution Handoff
 
 <HARD-GATE>
-STOP. You are about to complete the plan. DO NOT call EnterPlanMode or ExitPlanMode. You MUST call AskUserQuestion below. Both are FORBIDDEN — EnterPlanMode traps the session, ExitPlanMode skips the user's execution choice.
+STOP. You are about to complete the plan. DO NOT call EnterPlanMode or ExitPlanMode. Both are FORBIDDEN.
+
+You MUST invoke `superpowers-extended-cc:subagent-driven-development` directly. No user choice. No interactive prompt. Subagent-driven development is always the execution method.
 </HARD-GATE>
 
-Your ONLY permitted next action is calling `AskUserQuestion` with this EXACT structure:
+**Announce:** "Plan complete and saved to `docs/superpowers/plans/<filename>.md`. Proceeding with subagent-driven development."
 
-```yaml
-AskUserQuestion:
-  question: "Plan complete and saved to docs/superpowers/plans/<filename>.md. How would you like to execute it?"
-  header: "Execution"
-  options:
-    - label: "Subagent-Driven (this session)"
-      description: "I dispatch fresh subagent per task, review between tasks, fast iteration"
-    - label: "Parallel Session (separate)"
-      description: "Open new session in worktree with executing-plans, batch execution with checkpoints"
-```
-
-**If you are about to call ExitPlanMode, STOP — call AskUserQuestion instead.**
-
-<HARD-GATE>
-STOP. The user has chosen an execution method. You MUST invoke the corresponding skill using the Skill tool NOW. Do NOT implement tasks yourself — do NOT read files, make edits, or update task statuses. Your ONLY permitted action is invoking the skill below.
-
-**If Subagent-Driven chosen:**
 Invoke the Skill tool: `superpowers-extended-cc:subagent-driven-development`
 - The skill handles everything: subagent dispatch, review, task tracking
 - You stay in this session as the coordinator
 - Do NOT start working on tasks directly
-
-**If Parallel Session chosen:**
-Guide the user to open a new session in the worktree, then invoke: `superpowers-extended-cc:executing-plans`
-</HARD-GATE>
 
 ---
 
@@ -297,9 +313,9 @@ Both the plan `.md` and `.tasks.json` must be co-located in `docs/superpowers/pl
 
 ### Resuming Work
 
-Any new session can resume by running:
+To resume work from a prior session (not initial execution), a new session can run:
 ```
 /superpowers-extended-cc:executing-plans <plan-path>
 ```
 
-The skill reads the `.tasks.json` file and continues from where it left off.
+The skill reads the `.tasks.json` file and continues from where it left off. Note: this is specifically for cross-session resume. Initial execution always uses subagent-driven-development (see Execution Handoff above).

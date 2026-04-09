@@ -91,20 +91,15 @@ When dispatching an implementer subagent:
 2. Parse the metadata JSON and map fields (files, acceptanceCriteria, verifyCommand) to the implementer prompt sections
 3. The implementer should receive ALL structured data — don't make them parse it from prose
 
-## Model Selection
+## Model Policy
 
-Use the least powerful model that can handle each role to conserve cost and increase speed.
+All subagents use opus. No exceptions. This applies to:
+- Implementation subagents
+- Spec compliance reviewer subagents
+- Code quality reviewer subagents
+- Final code reviewer subagent
 
-**Mechanical implementation tasks** (isolated functions, clear specs, 1-2 files): use a fast, cheap model. Most implementation tasks are mechanical when the plan is well-specified.
-
-**Integration and judgment tasks** (multi-file coordination, pattern matching, debugging): use a standard model.
-
-**Architecture, design, and review tasks**: use the most capable available model.
-
-**Task complexity signals:**
-- Touches 1-2 files with a complete spec → cheap model
-- Touches multiple files with integration concerns → standard model
-- Requires design judgment or broad codebase understanding → most capable model
+When dispatching any subagent via the Agent tool, always pass `model: "opus"`.
 
 ## Handling Implementer Status
 
@@ -117,12 +112,11 @@ Implementer subagents report one of four statuses. Handle each appropriately:
 **NEEDS_CONTEXT:** The implementer needs information that wasn't provided. Provide the missing context and re-dispatch.
 
 **BLOCKED:** The implementer cannot complete the task. Assess the blocker:
-1. If it's a context problem, provide more context and re-dispatch with the same model
-2. If the task requires more reasoning, re-dispatch with a more capable model
-3. If the task is too large, break it into smaller pieces
-4. If the plan itself is wrong, escalate to the human
+1. If it's a context problem, provide more context and re-dispatch
+2. If the task is too large, break it into smaller pieces
+3. If the plan itself is wrong, escalate to the human
 
-**Never** ignore an escalation or force the same model to retry without changes. If the implementer said it's stuck, something needs to change.
+**Never** ignore an escalation or force a retry without changes. If the implementer said it's stuck, something needs to change.
 
 ## Prompt Templates
 
@@ -236,7 +230,23 @@ Done!
 - More subagent invocations (implementer + 2 reviewers per task)
 - Controller does more prep work (extracting all tasks upfront)
 - Review loops add iterations
-- But catches issues early (cheaper than debugging later)
+- But catches issues early (less costly than debugging later)
+
+## Mandatory Code Review
+
+Code review is mandatory. Never skip the final code review round regardless of task count or perceived simplicity.
+
+After the final code review, ALL findings must be addressed before proceeding. No "minor, will fix later." No deferring issues. Every finding gets resolved or explicitly justified.
+
+<HARD-GATE>
+You MUST NOT invoke finishing-a-development-branch until the final code review is complete and all findings are addressed.
+</HARD-GATE>
+
+## Mandatory Finishing Branch
+
+You MUST invoke `superpowers-extended-cc:finishing-a-development-branch` before any git push or PR creation. No shortcutting directly to `gh pr create` or `git push`.
+
+**WIP push escape hatch:** When the user explicitly requests a WIP push for backup or collaboration, allow it without requiring finishing-a-development-branch. The mandate applies to completed work, not in-progress backups.
 
 ## Red Flags
 

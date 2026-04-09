@@ -23,15 +23,16 @@ Every project goes through this process. A todo list, a single-function utility,
 
 You MUST create a task for each of these items and complete them in order:
 
-1. **Explore project context** — check files, docs, recent commits
-2. **Offer visual companion** (if topic will involve visual questions) — this is its own message, not combined with a clarifying question. See the Visual Companion section below.
-3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
-4. **Propose 2-3 approaches** — with trade-offs and your recommendation
-5. **Present design** — in sections scaled to their complexity, get user approval after each section
-6. **Write design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit
-7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
-8. **User reviews written spec** — ask user to review the spec file before proceeding
-9. **Transition to implementation** — invoke writing-plans skill to create implementation plan
+1. **Explore project context** - check files, docs, recent commits
+2. **Offer visual companion** (if topic will involve visual questions) - this is its own message, not combined with a clarifying question. See the Visual Companion section below.
+3. **Ask clarifying questions** - one at a time, understand purpose/constraints/success criteria
+4. **Propose 2-3 approaches** - with trade-offs and your recommendation
+5. **Present design** - in sections scaled to their complexity, get user approval after each section
+6. **Write design doc** - save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit
+7. **Spec self-review** - quick inline check for placeholders, contradictions, ambiguity, scope (see below)
+8. **Adversarial spec review** - dispatch two opus subagents (advocate + challenger), reconcile findings, fix spec (see below)
+9. **User reviews written spec** - ask user to review the spec file before proceeding
+10. **Transition to implementation** - invoke writing-plans skill to create implementation plan
 
 ## Process Flow
 
@@ -46,6 +47,7 @@ digraph brainstorming {
     "User approves design?" [shape=diamond];
     "Write design doc" [shape=box];
     "Spec self-review\n(fix inline)" [shape=box];
+    "Adversarial spec review\n(advocate + challenger)" [shape=box];
     "User reviews spec?" [shape=diamond];
     "Invoke writing-plans skill" [shape=doublecircle];
 
@@ -59,7 +61,8 @@ digraph brainstorming {
     "User approves design?" -> "Present design sections" [label="no, revise"];
     "User approves design?" -> "Write design doc" [label="yes"];
     "Write design doc" -> "Spec self-review\n(fix inline)";
-    "Spec self-review\n(fix inline)" -> "User reviews spec?";
+    "Spec self-review\n(fix inline)" -> "Adversarial spec review\n(advocate + challenger)";
+    "Adversarial spec review\n(advocate + challenger)" -> "User reviews spec?";
     "User reviews spec?" -> "Write design doc" [label="changes requested"];
     "User reviews spec?" -> "Invoke writing-plans skill" [label="approved"];
 }
@@ -124,6 +127,37 @@ After writing the spec document, look at it with fresh eyes:
 4. **Ambiguity check:** Could any requirement be interpreted two different ways? If so, pick one and make it explicit.
 
 Fix any issues inline. No need to re-review — just fix and move on.
+
+## Adversarial Spec Review
+
+After self-review, dispatch two opus subagents in parallel to adversarially review the spec. Fix issues autonomously. Only escalate true unknowns to the user.
+
+**Dispatch two opus subagents in parallel:**
+
+1. **Advocate subagent:** Argues the spec is solid. Identifies strengths, validates completeness, confirms feasibility. Must genuinely defend the design, not rubber-stamp. Prompt must include:
+   - The full spec document content
+   - "You are the ADVOCATE. A CHALLENGER is reviewing this same spec. You will not see their output."
+   - "Provide: Strengths, Acknowledged Risks, Defense of Design Choices"
+   - "Keep under 500 words. Focus on substance."
+
+2. **Challenger subagent:** Argues against the spec. Finds gaps, ambiguities, missing edge cases, flawed assumptions, better alternatives. Must genuinely attack, not nitpick formatting. Prompt must include:
+   - The full spec document content
+   - "You are the CHALLENGER. An ADVOCATE is reviewing this same spec. You will not see their output."
+   - "Provide: Gaps, Ambiguities, Flawed Assumptions, Better Alternatives, Daily-Use Friction Risks"
+   - "Keep under 500 words. Focus on top 5-7 most impactful issues."
+
+**Both subagents MUST use model: opus.**
+
+**Reconciliation (orchestrator does this, not a subagent):**
+
+| Situation | Action |
+|-----------|--------|
+| Challenger raises point advocate also flagged as risk | High-confidence issue. Fix it. |
+| Challenger raises point advocate explicitly defended | Evaluate both arguments. Pick the stronger one. |
+| Both agree on a point | No action needed. |
+| Neither can resolve, depends on user intent/domain knowledge | Surface to user. |
+
+After reconciliation, implement fixes directly into the spec document. Then proceed to user review.
 
 **User Review Gate:**
 After the spec review loop passes, ask the user to review the written spec before proceeding:
