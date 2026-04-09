@@ -46,6 +46,34 @@ git merge-base HEAD main 2>/dev/null || git merge-base HEAD master 2>/dev/null
 
 Or ask: "This branch split from main - is that correct?"
 
+### Step 2.5: Rebase Check
+
+Before presenting options, ensure the branch is current with the base.
+
+```bash
+# Fetch latest
+git fetch origin <base-branch>
+
+# Check if behind
+git merge-base --is-ancestor origin/<base-branch> HEAD
+```
+
+**If up-to-date:** Proceed to Step 3.
+
+**If behind:**
+
+1. Check if branch has been pushed:
+   ```bash
+   git log --oneline origin/<feature-branch> 2>/dev/null
+   ```
+2. **If pushed (shared history):** Warn: "This branch has been pushed to origin. Rebasing will rewrite shared history. Proceed?" Only rebase with explicit user confirmation.
+3. **If local-only:** Auto-rebase without prompting.
+4. Rebase: `git rebase origin/<base-branch>`
+5. **If rebase succeeds:** Re-run the full test suite on the rebased result. If tests fail, STOP and report.
+6. **If rebase has conflicts:** STOP. Present the conflicts to the user. Do not auto-resolve merge conflicts.
+
+Only proceed to Step 3 after rebase + tests pass (or branch was already up-to-date).
+
 ### Step 3: Present Options
 
 Present exactly these 4 options:
@@ -137,6 +165,16 @@ Then: Cleanup worktree (Step 5)
 
 **For Options 1, 2, 4:**
 
+**Delete lockfile (if exists):**
+```bash
+rm -f "$worktree_path/.claude-instance-lock"
+```
+
+**Delete checkpoint state (if exists):**
+```bash
+rm -f .claude-workflow-state.json
+```
+
 Check if in worktree:
 ```bash
 git worktree list | grep $(git branch --show-current)
@@ -157,6 +195,8 @@ git worktree remove <worktree-path>
 | 2. Create PR | - | ✓ | ✓ | - |
 | 3. Keep as-is | - | - | ✓ | - |
 | 4. Discard | - | - | - | ✓ (force) |
+
+**Pre-step for all options:** Rebase check runs before presenting options. Lockfile and checkpoint cleanup runs during Step 5.
 
 ## Common Mistakes
 

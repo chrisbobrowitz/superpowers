@@ -13,6 +13,58 @@ Git worktrees create isolated workspaces sharing the same repository, allowing w
 
 **Announce at start:** "I'm using the using-git-worktrees skill to set up an isolated workspace."
 
+## Multi-Instance Isolation
+
+Prevents two Claude Code instances from colliding when working in the same repo. Uses lockfiles in worktrees to detect and prevent conflicts.
+
+**Scope:** This mechanism is designed for local-machine use (two terminals on the same computer). PID-based lock detection does not work across machines, containers, or SSH sessions.
+
+### Lockfile Format
+
+When creating a worktree, write `.claude-instance-lock` in the worktree root:
+
+```json
+{
+  "instanceId": "<process-id>-<timestamp>",
+  "branch": "feat/my-feature",
+  "startedAt": "2026-04-09T14:30:00Z",
+  "pid": 12345
+}
+```
+
+The `instanceId` is generated from the shell's PID (`$$` or `$PPID`) and the current timestamp.
+
+### Before Creating a Worktree
+
+1. Scan all existing worktrees (`git worktree list`) for `.claude-instance-lock` files.
+2. For each lock found, check if the PID is still running: `kill -0 <pid> 2>/dev/null`
+3. If PID is alive: report "Another Claude instance is working in worktree X on branch Y." Create a NEW worktree on a different branch. Do not share worktrees.
+4. If PID is dead: stale lock. Auto-delete it and log "Cleaned up stale lock from instance X (process no longer running)."
+
+### Block Direct Main Checkout Work
+
+If another instance's lock exists anywhere in the repo's worktrees (with alive PID), refuse to work directly in the main checkout. Force worktree creation. This prevents two instances from editing the same files.
+
+### Lockfile Creation
+
+After creating the worktree (Step 2 in Creation Steps), write the lockfile:
+
+```bash
+echo '{"instanceId": "'$$-$(date +%s)'", "branch": "'$BRANCH_NAME'", "startedAt": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'", "pid": '$$'}' > "$path/.claude-instance-lock"
+```
+
+### Lockfile Cleanup
+
+The lockfile is deleted by `finishing-a-development-branch` before worktree cleanup. If a session crashes, the stale lock will be auto-cleaned on next detection scan.
+
+### Lockfile Gitignore
+
+Add `.claude-instance-lock` to `.gitignore` if not already present. Lockfiles are ephemeral and should never be committed.
+
+```bash
+grep -q "\.claude-instance-lock" .gitignore || echo ".claude-instance-lock" >> .gitignore
+```
+
 ## Directory Selection Process
 
 Follow this priority order:
@@ -152,6 +204,8 @@ Ready to implement <feature-name>
 | Directory not ignored | Add to .gitignore + commit |
 | Tests fail during baseline | Report failures + ask |
 | No package.json/Cargo.toml | Skip dependency install |
+| Another instance active | Report it, create separate worktree |
+| Stale lockfile found | Auto-delete, log cleanup |
 
 ## Common Mistakes
 
@@ -199,12 +253,17 @@ Ready to implement auth feature
 - Proceed with failing tests without asking
 - Assume directory location when ambiguous
 - Skip CLAUDE.md check
+- Share a worktree with another Claude instance
+- Work in main checkout when another instance has an active lock
 
 **Always:**
 - Follow directory priority: existing > CLAUDE.md > ask
 - Verify directory is ignored for project-local
 - Auto-detect and run project setup
 - Verify clean test baseline
+- Scan for existing lockfiles before creating a worktree
+- Write lockfile after creating a worktree
+- Clean up lockfile when finishing
 
 ## Integration
 

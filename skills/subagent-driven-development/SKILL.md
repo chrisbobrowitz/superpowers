@@ -68,7 +68,13 @@ digraph process {
     "Implementer subagent asks questions?" -> "Answer questions, provide context" [label="yes"];
     "Answer questions, provide context" -> "Dispatch implementer subagent (skills/subagent-driven-development/implementer-prompt.md)";
     "Implementer subagent asks questions?" -> "Implementer subagent implements, tests, commits, self-reviews" [label="no"];
-    "Implementer subagent implements, tests, commits, self-reviews" -> "Dispatch spec reviewer subagent (skills/subagent-driven-development/spec-reviewer-prompt.md)";
+    "Drift detection: files match plan?" [shape=diamond];
+    "Re-dispatch implementer (scope violation)" [shape=box];
+
+    "Implementer subagent implements, tests, commits, self-reviews" -> "Drift detection: files match plan?";
+    "Drift detection: files match plan?" -> "Dispatch spec reviewer subagent (skills/subagent-driven-development/spec-reviewer-prompt.md)" [label="yes"];
+    "Drift detection: files match plan?" -> "Re-dispatch implementer (scope violation)" [label="no"];
+    "Re-dispatch implementer (scope violation)" -> "Drift detection: files match plan?" [label="re-check"];
     "Dispatch spec reviewer subagent (skills/subagent-driven-development/spec-reviewer-prompt.md)" -> "Spec reviewer subagent confirms code matches spec?";
     "Spec reviewer subagent confirms code matches spec?" -> "Implementer subagent fixes spec gaps" [label="no"];
     "Implementer subagent fixes spec gaps" -> "Dispatch spec reviewer subagent (skills/subagent-driven-development/spec-reviewer-prompt.md)" [label="re-review"];
@@ -101,6 +107,55 @@ Implementation subagents use sonnet. Review and orchestration use opus. The orch
 | Spec compliance reviewer subagents | `model: "opus"` | Judgment-heavy, catches spec drift |
 | Code quality reviewer subagents | `model: "opus"` | Judgment-heavy, catches quality issues |
 | Final code reviewer subagent | `model: "opus"` | Holistic review across all tasks |
+
+## Plan Drift Detection
+
+After each implementer subagent completes (reports DONE) and BEFORE dispatching the spec reviewer, check if the subagent stayed within the plan's declared file scope.
+
+### Pre-Task SHA Capture
+
+Before dispatching each implementer subagent, capture the current HEAD:
+
+```bash
+PRE_TASK_SHA=$(git rev-parse HEAD)
+```
+
+### After Implementer Returns
+
+1. Get actual files changed: `git diff --name-only $PRE_TASK_SHA`
+2. Extract the task's declared "Files" section from the plan (Create/Modify/Test paths)
+3. Filter against the drift allowlist (see below)
+4. Compare:
+   - **Undeclared files touched:** Files in the diff (added, modified, or deleted) not in the plan's Files section
+   - **Declared files untouched:** Files in the plan that were not in the diff (warning only)
+
+### Drift Allowlist
+
+These file patterns are excluded from drift comparison (common transitive side effects):
+- `__init__.py` files (Python import updates)
+- Lock files (`*.lock`, `package-lock.json`, `poetry.lock`)
+- Generated files matching `.gitignore` patterns
+
+**Extensibility:** Projects can extend the allowlist via CLAUDE.md by adding a `driftAllowlist` section listing additional file patterns (e.g., `go.sum`, `Cargo.lock`). The orchestrator reads CLAUDE.md at the start of subagent-driven-development and merges project-specific patterns with the default allowlist.
+
+### Handling Drift
+
+**If undeclared files were touched (after allowlist filtering):**
+- Task fails drift check. Do not proceed to spec review.
+- Report: "Implementer modified files not in the plan: [list]. Expected only: [plan files]."
+- Re-dispatch the implementer: "You touched files outside your task scope. Revert changes to [undeclared files] and only modify [declared files]."
+- If re-dispatch fails again (second drift violation on same files): hard reset to PRE_TASK_SHA (`git reset --hard $PRE_TASK_SHA`) and escalate to the user.
+- If drift appears genuinely necessary: ask the user for confirmation before adding the file to the plan. Do not autonomously update plan scope.
+
+**If declared files were untouched:**
+- Flag as warning (not a block). The spec reviewer will catch missing functionality.
+
+### Review Pipeline
+
+The review pipeline is now a three-stage gate:
+1. **Drift detection** (new) - did the subagent stay within scope?
+2. **Spec compliance** (existing) - does the code match the spec?
+3. **Code quality** (existing) - is the code well-written?
 
 ## Handling Implementer Status
 
@@ -290,6 +345,22 @@ After marking each task completed via `TaskUpdate`, update the `.tasks.json` fil
 4. Write the file back
 
 This ensures cross-session resume works correctly. Without this, a new session loading `.tasks.json` would see completed tasks as `"pending"`.
+
+### Workflow Checkpoint
+
+In addition to `.tasks.json` sync, write a checkpoint to `.claude-workflow-state.json` after each task completes:
+
+- Set `activeSkill` to `"subagent-driven-development"`
+- Set `phase` to `"task-N-completed"` (where N is the task number)
+- `.tasks.json` remains the single source of truth for task completion state. The checkpoint file only stores skill-level context (active skill, current phase, branch/worktree path).
+
+Also checkpoint at these moments:
+- When dispatching the implementer: `"task-N-in-progress"`
+- Before drift detection: `"task-N-drift-check"`
+- Before spec review: `"task-N-spec-review"`
+- Before quality review: `"task-N-quality-review"`
+- Before final code review: `"final-code-review"`
+- Before finishing branch: `"finishing-branch"`
 
 ## Integration
 
