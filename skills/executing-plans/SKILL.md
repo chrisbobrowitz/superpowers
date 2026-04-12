@@ -13,6 +13,8 @@ description: Use when you have a written implementation plan to execute in a sep
 
 Load plan, review critically, execute all tasks, report when complete.
 
+**Model selection:** See `skills/shared/model-selection-guide.md` for model tier guidance when dispatching subagents.
+
 **Announce at start:** "I'm using the executing-plans skill to implement this plan."
 
 **Note:** Tell your human partner that Superpowers works much better with access to subagents. The quality of its work will be significantly higher if run on a platform with subagent support (such as Claude Code or Codex). If subagents are available, use superpowers-extended-cc:subagent-driven-development instead of this skill.
@@ -75,7 +77,7 @@ For each task:
 After all tasks complete and verified:
 - Announce: "I'm using the finishing-a-development-branch skill to complete this work."
 - **REQUIRED SUB-SKILL:** Use superpowers-extended-cc:finishing-a-development-branch
-- Follow that skill to verify tests, present options, execute choice
+- Follow that skill to verify tests, push to remote, and create PR
 
 ## When to Stop and Ask for Help
 

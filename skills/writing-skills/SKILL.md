@@ -537,6 +537,8 @@ Follow the TDD cycle:
 ### RED: Write Failing Test (Baseline)
 
 Run pressure scenario with subagent WITHOUT the skill. Document exact behavior:
+
+**Model selection:** Testing subagents use Standard tier (sonnet). See `skills/shared/model-selection-guide.md`.
 - What choices did they make?
 - What rationalizations did they use (verbatim)?
 - Which pressures triggered violations?

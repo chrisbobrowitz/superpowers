@@ -64,35 +64,14 @@ Skills use Claude Code tool names. Non-CC platforms: see `references/copilot-too
 
 **Invoke relevant or requested skills BEFORE any response or action.** Even a 1% chance a skill might apply means that you should invoke the skill to check. If an invoked skill turns out to be wrong for the situation, you don't need to use it.
 
-## Mid-Conversation Re-trigger
+## Brainstorming Scope
 
-When a new user message arrives mid-conversation, evaluate whether brainstorming should be re-invoked:
-
-1. Has a brainstorming cycle already completed for THIS SPECIFIC ask? If yes, skip.
-2. Is this a new ask (not a follow-up to the current in-progress task)? If yes, evaluate.
-3. Judgment call with bias toward triggering: Would this ask benefit from exploring requirements, approaches, or trade-offs? If even slightly yes, invoke brainstorming.
-
-**Red flags that SHOULD trigger brainstorming:**
-- "Can you also add..." (new feature on top of existing work)
-- "Actually, let's change..." (pivot in direction)
-- "New thing -" / "Next task -" (explicit new scope)
-- Any ask that introduces new behavior, new files, or new integration points
-
-**Cases where it's fine to skip:**
-- "Fix this typo"
-- "Rename X to Y"
-- "Run the tests"
-- Small, self-evident code changes (add a log line, update a constant)
-- Direct follow-up questions about in-progress work
-
-**Default: trigger.** If you're unsure, brainstorm. The cost of an unnecessary brainstorm is minutes. The cost of skipping one is building the wrong thing.
+Brainstorming runs once at session start for the initial ask. It does not re-trigger automatically mid-conversation. If the user wants to brainstorm a new idea during an active session, they invoke it explicitly with `/superpowers-extended-cc:brainstorming`.
 
 ```dot
 digraph skill_flow {
     "User message received" [shape=doublecircle];
     "About to EnterPlanMode? DON'T" [shape=doublecircle];
-    "New non-trivial ask?" [shape=diamond];
-    "Invoke brainstorming skill\n(re-trigger)" [shape=box];
     "Already brainstormed?" [shape=diamond];
     "Invoke brainstorming skill" [shape=box];
     "Might any skill apply?" [shape=diamond];
@@ -108,10 +87,7 @@ digraph skill_flow {
     "Already brainstormed?" -> "Might any skill apply?" [label="yes"];
     "Invoke brainstorming skill" -> "Might any skill apply?";
 
-    "User message received" -> "New non-trivial ask?";
-    "New non-trivial ask?" -> "Invoke brainstorming skill\n(re-trigger)" [label="yes, bias toward triggering"];
-    "New non-trivial ask?" -> "Might any skill apply?" [label="no, trivial/follow-up"];
-    "Invoke brainstorming skill\n(re-trigger)" -> "Might any skill apply?";
+    "User message received" -> "Already brainstormed?";
     "Might any skill apply?" -> "Invoke Skill tool" [label="yes, even 1%"];
     "Might any skill apply?" -> "Respond (including clarifications)" [label="definitely not"];
     "Invoke Skill tool" -> "Announce: 'Using [skill] to [purpose]'";
@@ -140,9 +116,6 @@ These thoughts mean STOP—you're rationalizing:
 | "I'll just do this one thing first" | Check BEFORE doing anything. |
 | "This feels productive" | Undisciplined action wastes time. Skills prevent this. |
 | "I know what that means" | Knowing the concept ≠ using the skill. Invoke it. |
-| "We already brainstormed this session" | Each new ask gets its own evaluation. Session does not equal scope. |
-| "This is a follow-up" | Follow-ups to the same task are fine. New features are not follow-ups. |
-| "The user said 'also'" | "Also" usually means new scope. Evaluate before skipping. |
 
 ## Skill Priority
 

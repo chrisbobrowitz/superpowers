@@ -1,0 +1,59 @@
+{
+  "planPath": "docs/superpowers/plans/2026-04-12-model-selection-and-workflow-fixes.md",
+  "tasks": [
+    {
+      "id": 9,
+      "subject": "Task 1: Create Model Selection Guide",
+      "status": "pending",
+      "description": "Create `skills/shared/model-selection-guide.md` with 3-tier table, hard constraint, per-skill application.\n\n```json:metadata\n{\"files\": [\"skills/shared/model-selection-guide.md\"], \"verifyCommand\": \"cat skills/shared/model-selection-guide.md | head -5\", \"acceptanceCriteria\": [\"File exists\", \"Contains 3-tier table\", \"Contains hard constraint\", \"Contains per-skill guidance\", \"Defines Explore-type agents\"]}\n```"
+    },
+    {
+      "id": 10,
+      "subject": "Task 2: Remove Mid-Conversation Brainstorm Re-trigger",
+      "status": "pending",
+      "description": "Remove re-trigger section from using-superpowers. Replace with single rule. Remove 3 Red Flags entries. Update diagram.\n\n```json:metadata\n{\"files\": [\"skills/using-superpowers/SKILL.md\"], \"verifyCommand\": \"grep -c 'Mid-Conversation Re-trigger' skills/using-superpowers/SKILL.md\", \"acceptanceCriteria\": [\"Re-trigger section removed\", \"Replacement rule added\", \"Three Red Flags entries removed\", \"Diagram updated\"]}\n```"
+    },
+    {
+      "id": 13,
+      "subject": "Task 3: Auto-Proceed from Brainstorming to Writing-Plans",
+      "status": "pending",
+      "blockedBy": [9],
+      "description": "Remove user review gate from brainstorming. Remove step 9, renumber. Remove User Review Gate section. Add model guide ref. Update diagram.\n\n```json:metadata\n{\"files\": [\"skills/brainstorming/SKILL.md\"], \"verifyCommand\": \"grep -c 'User reviews spec' skills/brainstorming/SKILL.md\", \"acceptanceCriteria\": [\"Step 9 removed\", \"Step 10 renumbered\", \"User Review Gate removed\", \"Model guide ref added\", \"Diagram updated\"]}\n```"
+    },
+    {
+      "id": 11,
+      "subject": "Task 4: Tighten Writing-Plans Auto-Proceed",
+      "status": "pending",
+      "blockedBy": [9],
+      "description": "Verify HARD-GATE has no competing instructions. Add model guide ref.\n\n```json:metadata\n{\"files\": [\"skills/writing-plans/SKILL.md\"], \"verifyCommand\": \"grep -c 'No user choice' skills/writing-plans/SKILL.md\", \"acceptanceCriteria\": [\"No competing instructions\", \"Model guide ref added\", \"HARD-GATE intact\"]}\n```"
+    },
+    {
+      "id": 14,
+      "subject": "Task 5: Update Subagent-Driven-Development Model Policy",
+      "status": "pending",
+      "blockedBy": [9],
+      "description": "Replace hardcoded model policy with guide reference. Keep role table with Tier column.\n\n```json:metadata\n{\"files\": [\"skills/subagent-driven-development/SKILL.md\"], \"verifyCommand\": \"grep -c 'model-selection-guide' skills/subagent-driven-development/SKILL.md\", \"acceptanceCriteria\": [\"References shared guide\", \"Role table preserved with Tier\", \"No hardcoded values outside table\"]}\n```"
+    },
+    {
+      "id": 16,
+      "subject": "Task 6: Auto-Finish with Push and PR",
+      "status": "pending",
+      "blockedBy": [9],
+      "description": "Replace 4-option menu with deterministic push+PR. Update all sections.\n\n```json:metadata\n{\"files\": [\"skills/finishing-a-development-branch/SKILL.md\"], \"verifyCommand\": \"grep -c 'Which option' skills/finishing-a-development-branch/SKILL.md\", \"acceptanceCriteria\": [\"No options menu\", \"Deterministic push+PR\", \"Test failure is only gate\", \"Scope note added\", \"Quick ref updated\", \"Mistakes and red flags updated\"]}\n```"
+    },
+    {
+      "id": 12,
+      "subject": "Task 7: Add Model Guide References to Remaining Skills",
+      "status": "pending",
+      "blockedBy": [9],
+      "description": "Add model-selection-guide refs to dispatching-parallel-agents, systematic-debugging, requesting-code-review, writing-skills, executing-plans.\n\n```json:metadata\n{\"files\": [\"skills/dispatching-parallel-agents/SKILL.md\", \"skills/systematic-debugging/SKILL.md\", \"skills/requesting-code-review/SKILL.md\", \"skills/writing-skills/SKILL.md\", \"skills/executing-plans/SKILL.md\"], \"verifyCommand\": \"grep -rl 'model-selection-guide' skills/\", \"acceptanceCriteria\": [\"All 5 files reference guide\", \"References contextually placed\"]}\n```"
+    },
+    {
+      "id": 15,
+      "subject": "Task 8: Apply Upstream Hook Changes and Update README",
+      "status": "pending",
+      "description": "Delete hooks/pre-commit-check-tasks. Update example hook. Update hooks.json. Update README.\n\n```json:metadata\n{\"files\": [\"hooks/pre-commit-check-tasks\", \"hooks/examples/pre-commit-check-tasks.sh\", \"hooks/hooks.json\", \"README.md\"], \"verifyCommand\": \"test ! -f hooks/pre-commit-check-tasks && echo deleted\", \"acceptanceCriteria\": [\"pre-commit-check-tasks deleted\", \"Example blocks only in_progress\", \"hooks.json no PreToolUse\", \"README updated\"]}\n```"
+    }
+  ],
+  "lastUpdated": "2026-04-12T00:00:00Z"
+}

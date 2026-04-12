@@ -39,12 +39,10 @@ Complete these steps in order. Create a task for each step **as you begin it** (
    - TaskCreate subject: `"Spec self-review"`
 8. **Adversarial spec review** - dispatch two opus subagents (advocate + challenger), reconcile findings, fix spec (see below)
    - TaskCreate subject: `"Adversarial spec review"`
-9. **User reviews written spec** - ask user to review the spec file before proceeding
-   - TaskCreate subject: `"User reviews spec"`
-10. **Transition to implementation** - invoke writing-plans skill to create implementation plan
+9. **Transition to implementation** - invoke writing-plans skill to create implementation plan
     - TaskCreate subject: `"Transition to implementation"`
 
-**Do NOT create all 10 tasks at once.** Create each task individually when you start that step, with the subject above and a one-line description of what you're doing. Mark it in_progress immediately, then completed when done.
+**Do NOT create all 9 tasks at once.** Create each task individually when you start that step, with the subject above and a one-line description of what you're doing. Mark it in_progress immediately, then completed when done.
 
 ### Checkpoint Triggers
 
@@ -74,7 +72,6 @@ digraph brainstorming {
     "Write design doc" [shape=box];
     "Spec self-review\n(fix inline)" [shape=box];
     "Adversarial spec review\n(advocate + challenger)" [shape=box];
-    "User reviews spec?" [shape=diamond];
     "Invoke writing-plans skill" [shape=doublecircle];
 
     "Explore project context" -> "Visual questions ahead?";
@@ -88,9 +85,7 @@ digraph brainstorming {
     "User approves design?" -> "Write design doc" [label="yes"];
     "Write design doc" -> "Spec self-review\n(fix inline)";
     "Spec self-review\n(fix inline)" -> "Adversarial spec review\n(advocate + challenger)";
-    "Adversarial spec review\n(advocate + challenger)" -> "User reviews spec?";
-    "User reviews spec?" -> "Write design doc" [label="changes requested"];
-    "User reviews spec?" -> "Invoke writing-plans skill" [label="approved"];
+    "Adversarial spec review\n(advocate + challenger)" -> "Invoke writing-plans skill";
 }
 ```
 
@@ -174,6 +169,8 @@ After self-review, dispatch two opus subagents in parallel to adversarially revi
 
 **Both subagents MUST use model: opus.**
 
+See `skills/shared/model-selection-guide.md` for the full model selection policy.
+
 **Reconciliation (orchestrator does this, not a subagent):**
 
 | Situation | Action |
@@ -183,14 +180,9 @@ After self-review, dispatch two opus subagents in parallel to adversarially revi
 | Both agree on a point | No action needed. |
 | Neither can resolve, depends on user intent/domain knowledge | Surface to user. |
 
-After reconciliation, implement fixes directly into the spec document. Then proceed to user review.
+After reconciliation, implement fixes directly into the spec document.
 
-**User Review Gate:**
-After the spec review loop passes, ask the user to review the written spec before proceeding:
-
-> "Spec written and committed to `<path>`. Please review it and let me know if you want to make any changes before we start writing out the implementation plan."
-
-Wait for the user's response. If they request changes, make them and re-run the spec review loop. Only proceed once the user approves.
+**Auto-proceed:** After adversarial review fixes are applied, immediately invoke the writing-plans skill. Do not pause for user review.
 
 **Implementation:**
 

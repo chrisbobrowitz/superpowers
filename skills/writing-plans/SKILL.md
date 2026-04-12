@@ -197,6 +197,8 @@ After self-review, dispatch two opus subagents in parallel to adversarially revi
 
 **Both subagents MUST use model: opus.**
 
+See `skills/shared/model-selection-guide.md` for the full model selection policy.
+
 **Reconciliation:** Same rules as the brainstorming adversarial spec review:
 
 | Situation | Action |

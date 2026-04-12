@@ -65,6 +65,8 @@ Each agent gets:
 
 ### 3. Dispatch in Parallel
 
+**Model selection:** See `skills/shared/model-selection-guide.md`. Match the model tier to what each parallel agent is doing (Light for exploration, Standard for implementation, Heavy for review).
+
 ```typescript
 // In Claude Code / AI environment
 Task("Fix agent-tool-abort.test.ts failures")

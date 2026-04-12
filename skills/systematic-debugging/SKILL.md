@@ -286,6 +286,7 @@ These techniques are part of systematic debugging and available in this director
 **Related skills:**
 - **superpowers-extended-cc:test-driven-development** - For creating failing test case (Phase 4, Step 1)
 - **superpowers-extended-cc:verification-before-completion** - Verify fix worked before claiming success
+- **`skills/shared/model-selection-guide.md`** - When dispatching subagents for hypothesis testing (Light tier) or fix implementation (Standard tier)
 
 ## Real-World Impact
 
