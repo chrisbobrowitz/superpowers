@@ -10,14 +10,15 @@ This fork enforces a specific development workflow on top of the upstream superp
 
 | Customization | Skill Modified | What It Does |
 |---------------|----------------|--------------|
-| Brainstorming re-trigger | `using-superpowers` | Re-invokes brainstorming mid-conversation for any new non-trivial ask, with bias toward triggering |
+| Brainstorming scope | `using-superpowers` | Brainstorming runs once at session start. No automatic mid-conversation re-trigger. Users invoke explicitly if needed. |
 | Adversarial spec review | `brainstorming` | After spec self-review, dispatches two opus subagents (advocate + challenger) to adversarially review the spec |
 | Adversarial plan review | `writing-plans` | Same advocate/challenger pattern applied to implementation plans |
 | Mandatory TDD | `writing-plans` | All code-producing tasks must specify tests-first ordering. No exceptions for code. Skill edits, config, and docs are excluded. |
 | Auto-select subagent-driven | `writing-plans` | Removes the user choice between subagent-driven and parallel session. Always uses subagent-driven development. |
-| Opus-only subagents | `subagent-driven-development` | All subagents use opus. Replaces the tiered cheap/standard/capable model selection. |
+| 3-tier model selection | `subagent-driven-development`, all skills | Shared model guide: haiku for exploration, sonnet for implementation, opus for review. See `skills/shared/model-selection-guide.md`. |
 | Mandatory code review | `subagent-driven-development` | Final code review is mandatory with a HARD-GATE. All findings must be addressed before proceeding. |
 | Mandatory finishing branch | `subagent-driven-development` | Must invoke finishing-a-development-branch before any push or PR. WIP pushes allowed when explicitly requested. |
+| Auto-finish | `finishing-a-development-branch` | Automatically pushes branch and creates PR. No options menu. Only gate is test failure. |
 
 ### Removed from Upstream
 
@@ -54,9 +55,9 @@ You should see `superpowers-extended-cc@superpowers-extended-cc-marketplace` lis
 
 5. **test-driven-development** - Enforces RED-GREEN-REFACTOR within every code-producing task. Tests written and verified failing before any implementation.
 
-6. **finishing-a-development-branch** - Mandatory before any push or PR. Verifies tests, presents options (merge/PR/keep/discard), cleans up worktree.
+6. **finishing-a-development-branch** - Mandatory before any push or PR. Verifies tests, rebases, pushes branch, creates PR automatically. Cleans up worktree.
 
-**The agent checks for relevant skills before any task.** Non-trivial mid-conversation asks re-trigger brainstorming.
+**The agent checks for relevant skills before any task.**
 
 ## How Native Tasks Work
 
@@ -143,9 +144,9 @@ Claude Code may automatically enter Plan mode during planning tasks, which confl
 
 This blocks the model from calling `EnterPlanMode`, ensuring the brainstorming and writing-plans skills operate correctly in normal mode. See [upstream discussion](https://github.com/anthropics/claude-code/issues/23384) for context.
 
-### Block Commits With Incomplete Tasks
+### Optional: Block Commits With In-Progress Tasks
 
-When using native tasks, the agent should not commit until all tasks are finished. This plugin includes an example hook that blocks `git commit` when tasks are still open.
+When using native tasks, you can optionally block commits while tasks are still in progress. This plugin includes an example hook for this. Pending tasks pass through, enabling per-task commit workflows (e.g., subagent-driven-development can commit after each task).
 
 Add this to your `.claude/settings.local.json`:
 

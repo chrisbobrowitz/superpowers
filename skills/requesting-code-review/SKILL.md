@@ -23,6 +23,8 @@ Dispatch superpowers-extended-cc:code-reviewer subagent to catch issues before t
 
 ## How to Request
 
+**Model selection:** Code reviewer subagents use Heavy tier (opus). See `skills/shared/model-selection-guide.md`.
+
 **1. Get git SHAs:**
 ```bash
 BASE_SHA=$(git rev-parse HEAD~1)  # or origin/main

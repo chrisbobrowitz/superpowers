@@ -99,14 +99,14 @@ When dispatching an implementer subagent:
 
 ## Model Policy
 
-Implementation subagents use sonnet. Review and orchestration use opus. The orchestrator (you) stays on opus to catch what sonnet misses.
+See `skills/shared/model-selection-guide.md` for the full 3-tier model selection policy. The orchestrator (you) stays on opus to catch what lower tiers miss.
 
-| Role | Model | Rationale |
-|------|-------|-----------|
-| Implementation subagents | `model: "sonnet"` | Mechanical work from well-specified plans |
-| Spec compliance reviewer subagents | `model: "opus"` | Judgment-heavy, catches spec drift |
-| Code quality reviewer subagents | `model: "opus"` | Judgment-heavy, catches quality issues |
-| Final code reviewer subagent | `model: "opus"` | Holistic review across all tasks |
+| Role | Tier | Model | Rationale |
+|------|------|-------|-----------|
+| Implementation subagents | Standard | `model: "sonnet"` | Write code from well-specified plans |
+| Spec compliance reviewer subagents | Heavy | `model: "opus"` | Judgment-heavy, catches spec drift |
+| Code quality reviewer subagents | Heavy | `model: "opus"` | Judgment-heavy, catches quality issues |
+| Final code reviewer subagent | Heavy | `model: "opus"` | Holistic review across all tasks |
 
 ## Plan Drift Detection
 
