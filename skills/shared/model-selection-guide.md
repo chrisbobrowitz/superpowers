@@ -32,7 +32,7 @@ Always pass the `model` parameter explicitly when dispatching subagents. Never o
 | **subagent-driven-development** | Spec compliance reviewer | Heavy (opus) |
 | **subagent-driven-development** | Code quality reviewer | Heavy (opus) |
 | **subagent-driven-development** | Final code reviewer | Heavy (opus) |
-| **dispatching-parallel-agents** | Depends on task | Match tier to what agent does |
+| **dispatching-parallel-agents** | Depends on task (skill-aware) | Match tier to what agent does |
 | **systematic-debugging** | Hypothesis testing / exploration | Light (haiku) |
 | **systematic-debugging** | Fix implementation | Standard (sonnet) |
 | **requesting-code-review** | Code reviewer | Heavy (opus) |

@@ -62,6 +62,7 @@ Each agent gets:
 - **Clear goal:** Make these tests pass
 - **Constraints:** Don't change other code
 - **Expected output:** Summary of what you found and fixed
+- **Skill manifest:** Include the contents of `skills/shared/subagent-skill-manifest.md` at the end of every dispatch prompt. This gives each agent access to execution-phase skills (TDD, systematic-debugging, verification-before-completion, writing-plans) via the Skill tool.
 
 ### 3. Dispatch in Parallel
 
@@ -89,6 +90,13 @@ Good agent prompts are:
 1. **Focused** - One clear problem domain
 2. **Self-contained** - All context needed to understand the problem
 3. **Specific about output** - What should the agent return?
+4. **Skill-enabled** - Include the skill manifest so agents can invoke execution-phase skills
+
+### Skill Manifest Inclusion
+
+Read `skills/shared/subagent-skill-manifest.md` and append its content to every dispatch prompt. This is automatic - do not selectively omit it. Agents that do not need skills will simply never invoke them.
+
+### Example Prompt
 
 ```markdown
 Fix the 3 failing tests in src/agents/agent-tool-abort.test.ts:
@@ -109,6 +117,10 @@ These are timing/race condition issues. Your task:
 Do NOT just increase timeouts - find the real issue.
 
 Return: Summary of what you found and what you fixed.
+
+---
+
+[Contents of skills/shared/subagent-skill-manifest.md inlined here]
 ```
 
 ## Common Mistakes
