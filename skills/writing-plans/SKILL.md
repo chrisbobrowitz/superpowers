@@ -147,6 +147,18 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - Steps that describe what to do without showing how (code blocks required for code steps)
 - References to types, functions, or methods not defined in any task
 
+## No Type Suppression
+
+Plans must never include directives that suppress, ignore, or silence type checking. If code in a plan cannot satisfy the type checker, the types are wrong and must be fixed. These are **plan failures** — never write them:
+
+- Python: `# type: ignore`, `# type: ignore[...]`, `# pyright: ignore`, `# noqa` (when suppressing type errors)
+- TypeScript/JavaScript: `// @ts-ignore`, `// @ts-expect-error`, `as any`, `as unknown as T`
+- Go: `//nolint` (when suppressing type-related lints)
+- Rust: `#[allow(clippy::...)]` (when suppressing type-related warnings)
+- Any language-specific equivalent that silences the type checker
+
+If a type error arises, the plan must fix it properly: correct the type annotation, add a proper type guard, narrow the type, or restructure the code. Suppression comments are never the answer.
+
 ## Remember
 - Exact file paths always
 - Complete code in every step — if a step changes code, show the code
@@ -163,7 +175,9 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 
 **3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
 
-**4. TDD ordering:** Does every task that produces code have tests written before implementation in its Steps section? If any task has implementation before tests, reorder the steps.
+**4. Type suppression scan:** Search the plan for any type-ignore directives (`# type: ignore`, `// @ts-ignore`, `// @ts-expect-error`, `as any`, etc.). If found, replace them with proper type fixes. Plans must never suppress the type checker.
+
+**5. TDD ordering:** Does every task that produces code have tests written before implementation in its Steps section? If any task has implementation before tests, reorder the steps.
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 

@@ -3,9 +3,11 @@ name: using-superpowers
 description: Use when starting any conversation - establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions
 ---
 
-<SUBAGENT-STOP>
-If you were dispatched as a subagent to execute a specific task, skip this skill.
-</SUBAGENT-STOP>
+<SUBAGENT-SKILL-GATE>
+If you were dispatched as a subagent to execute a specific task:
+- If your dispatch prompt contains a **skill manifest** (a section listing available skills from `subagent-skill-manifest.md`), you may invoke the skills listed in that manifest via the Skill tool. Skip the rest of this skill (workflow resume, brainstorming, skill discovery flow).
+- If your dispatch prompt does NOT contain a skill manifest, skip this skill entirely.
+</SUBAGENT-SKILL-GATE>
 
 <EXTREMELY-IMPORTANT>
 If you think there is even a 1% chance a skill might apply to what you are doing, you ABSOLUTELY MUST invoke the skill.
