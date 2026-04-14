@@ -22,6 +22,7 @@ Task tool (general-purpose):
     | Completeness | TODOs, placeholders, incomplete tasks, missing steps |
     | Spec Alignment | Plan covers spec requirements, no major scope creep |
     | Task Decomposition | Tasks have clear boundaries, steps are actionable |
+    | Type Suppression | `# type: ignore`, `// @ts-ignore`, `// @ts-expect-error`, `as any`, or any directive that silences the type checker. These are NEVER allowed in plans. Types must be fixed properly. |
     | Buildability | Could an engineer follow this plan without getting stuck? |
 
     ## Calibration
