@@ -11,7 +11,7 @@ This fork enforces a specific development workflow on top of the upstream superp
 | Customization | Skill Modified | What It Does |
 |---------------|----------------|--------------|
 | Brainstorming scope | `using-superpowers` | Brainstorming runs once at session start. No automatic mid-conversation re-trigger. Users invoke explicitly if needed. |
-| Adversarial spec review | `brainstorming` | After spec self-review, dispatches two opus subagents (advocate + challenger) to adversarially review the spec |
+| Adversarial spec review | `brainstorming` | After spec self-review, dispatches subagents (advocate + challenger) to adversarially review the spec |
 | Adversarial plan review | `writing-plans` | Same advocate/challenger pattern applied to implementation plans |
 | Mandatory TDD | `writing-plans` | All code-producing tasks must specify tests-first ordering. No exceptions for code. Skill edits, config, and docs are excluded. |
 | Auto-select subagent-driven | `writing-plans` | Removes the user choice between subagent-driven and parallel session. Always uses subagent-driven development. |
