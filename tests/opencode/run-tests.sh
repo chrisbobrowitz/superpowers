@@ -44,7 +44,7 @@ while [[ $# -gt 0 ]]; do
             echo ""
             echo "Tests:"
             echo "  test-plugin-loading.sh  Verify plugin installation and structure"
-            echo "  test-tools.sh           Test use_skill and find_skills tools (integration)"
+            echo "  test-tools.sh           Test current skill discovery and loading (integration)"
             echo "  test-priority.sh        Test skill priority resolution (integration)"
             exit 0
             ;;
@@ -130,7 +130,7 @@ for test in "${tests[@]}"; do
             echo "  [FAIL] (${duration}s)"
             echo ""
             echo "  Output:"
-            echo "$output" | sed 's/^/    /'
+            printf '%s\n' "$output" | sed 's/^/    /'
             failed=$((failed + 1))
         fi
     fi
