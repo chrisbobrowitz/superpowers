@@ -16,6 +16,9 @@ Restart OpenCode. It installs the plugin package with Bun, loads `.opencode/plug
 
 Verify by asking OpenCode which skills it can see, or by asking: `Tell me about your superpowers`.
 
+OpenCode uses its own plugin install. If you also use Claude Code, Codex, or
+another harness, install Superpowers separately for each one.
+
 ### Migrating from the old symlink-based install
 
 If you previously installed with `git clone` and symlinks, remove the old setup:
@@ -66,7 +69,26 @@ description: Use when [condition] and [what it does]
 
 Create project-specific skills in `.opencode/skills/` within the repo.
 
+<<<<<<< HEAD
 Skill priority is: project skills > personal skills > bundled superpowers skills.
+=======
+**Skill Priority:** Project skills > Personal skills > Superpowers skills
+
+## Updating
+
+OpenCode installs Superpowers through a git-backed package spec. Some OpenCode
+and Bun versions pin that resolved git dependency in a lockfile or cache, so a
+restart may not pick up the newest Superpowers commit. If updates do not appear,
+clear OpenCode's package cache or reinstall the plugin.
+
+To pin a specific version, use a branch or tag:
+
+```json
+{
+  "plugin": ["superpowers@git+https://github.com/obra/superpowers.git#v5.0.3"]
+}
+```
+>>>>>>> f2cbfbe (Release v5.1.0 (#1468))
 
 ## How It Works
 
@@ -109,6 +131,26 @@ To pin a branch or tag:
 1. Check logs: `opencode run --print-logs "hello" 2>&1 | grep -i superpowers`
 2. Verify the plugin entry in `opencode.json`
 3. Restart OpenCode so it can refresh the plugin install
+
+### Windows install issues
+
+Some Windows OpenCode builds have upstream installer issues with git-backed
+plugin specs, including cache paths for `git+https` URLs and Bun not finding
+`git.exe` even when it works in a normal terminal. If OpenCode cannot install
+the plugin, try installing with system npm and pointing OpenCode at the local
+package:
+
+```powershell
+npm install superpowers@git+https://github.com/obra/superpowers.git --prefix "$HOME\.config\opencode"
+```
+
+Then use the installed package path in `opencode.json`:
+
+```json
+{
+  "plugin": ["~/.config/opencode/node_modules/superpowers"]
+}
+```
 
 ### Skills not found
 
