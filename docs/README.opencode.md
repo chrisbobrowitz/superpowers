@@ -69,10 +69,7 @@ description: Use when [condition] and [what it does]
 
 Create project-specific skills in `.opencode/skills/` within the repo.
 
-<<<<<<< HEAD
 Skill priority is: project skills > personal skills > bundled superpowers skills.
-=======
-**Skill Priority:** Project skills > Personal skills > Superpowers skills
 
 ## Updating
 
@@ -85,10 +82,9 @@ To pin a specific version, use a branch or tag:
 
 ```json
 {
-  "plugin": ["superpowers@git+https://github.com/obra/superpowers.git#v5.0.3"]
+  "plugin": ["superpowers@git+https://github.com/chrisbobrowitz/superpowers.git#main"]
 }
 ```
->>>>>>> f2cbfbe (Release v5.1.0 (#1468))
 
 ## How It Works
 
